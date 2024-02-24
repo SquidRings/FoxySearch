@@ -11,32 +11,15 @@
         <input type="text" id="query" placeholder="Enter your search query">
         <button type="submit">Search</button>
     </form>
-    <div id="searchTime"></div>
     <div id="results"></div>
-    <div id="error"></div>
 
     <script>
         document.getElementById('search-form').addEventListener('submit', async function(event) {
             event.preventDefault();
             const query = document.getElementById('query').value;
-            if (!query) {
-                document.getElementById('error').textContent = 'Please enter a search query.';
-                return;
-            }
-            const startTime = new Date().getTime();
-            try {
-                const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                const endTime = new Date().getTime();
-                const elapsedTime = (endTime - startTime) / 1000;
-                document.getElementById('searchTime').textContent = 'Search completed in ' + elapsedTime + ' seconds';
-                displayResults(data.results);
-            } catch (error) {
-                document.getElementById('error').textContent = 'An error occurred during the search: ' + error.message;
-            }
+            const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            displayResults(data);
         });
 
         function displayResults(results) {
