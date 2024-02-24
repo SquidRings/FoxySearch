@@ -15,45 +15,53 @@ class MyScraper:
             urls = json.load(f)
         return urls
 
-    def scrape(self):
-        with open(self.output_file, 'a') as f:
-            f.write("[")  # Add opening bracket
-            for i, url in enumerate(self.start_urls):
-                try:
-                    headers = {'User-Agent': self.user_agent.random}
-                    response = requests.get(url, headers=headers, proxies=self.proxies)
-                    if response.status_code == 200:
-                        soup = BeautifulSoup(response.content, 'html.parser')
-                        title = soup.find('title').get_text()
-                        print("Page title:", title)
+    def scrape(self, url=None):
+        if url is None:
+            # Write the opening bracket at the beginning of the file
+            with open(self.output_file, 'a') as f:
+                f.write("[\n")
+            url = self.start_urls.pop(0)
+        try:
+            headers = {'User-Agent': self.user_agent.random}
+            response = requests.get(url, headers=headers, proxies=self.proxies)
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.content, 'html.parser')
+                title = soup.find('title').get_text()
+                print("Page title:", title)
 
-                        # Extract main text content
-                        text_content = soup.get_text()
+                # Extract main text content
+                text_content = soup.get_text()
 
-                        # Extract metadata
-                        meta_tags = soup.find_all('meta')
-                        metadata = {tag.get('name', tag.get('property')): tag.get('content') for tag in meta_tags}
+                # Extract metadata
+                meta_tags = soup.find_all('meta')
+                metadata = {tag.get('name', tag.get('property')): tag.get('content') for tag in meta_tags}
 
-                        # Extract links
-                        links = [a['href'] for a in soup.find_all('a', href=True)]
+                # Extract links
+                links = [a['href'] for a in soup.find_all('a', href=True)]
+                self.start_urls.extend([link for link in links if link not in self.start_urls])
 
-                        # Save data to the output file
-                        data = {
-                            'url': url,
-                            'title': title,
-                            'text_content': text_content,
-                            'metadata': metadata,
-                            'links': links
-                        }
-                        json.dump(data, f)
-                        if i < len(self.start_urls) - 1:  # Add comma if not the last item
-                            f.write(",")
-                        f.write('\n')
-                    else:
-                        print(f"Failed to scrape {url}. Status code: {response.status_code}")
-                except Exception as e:
-                    print(f"Failed to scrape {url}. Error: {str(e)}")
-            f.write("]")  # Add closing bracket
+                # Save data to the output file
+                with open(self.output_file, 'a') as f:
+                    data = {
+                        'url': url,
+                        'title': title,
+                        'text_content': text_content,
+                        'metadata': metadata,
+                        'links': links
+                    }
+                    json.dump(data, f)
+                    if self.start_urls:  # Add comma if not the last item
+                        f.write(",\n")
+                    else:  # Write the closing bracket at the end of the file
+                        f.write("\n]")
+            else:
+                print(f"Failed to scrape {url}. Status code: {response.status_code}")
+        except Exception as e:
+            print(f"Failed to scrape {url}. Error: {str(e)}")
+
+        # Recursively scrape the next URL
+        if self.start_urls:
+            self.scrape(self.start_urls.pop(0))
 
 if __name__ == "__main__":
     start_urls_file = 'urls.json'
