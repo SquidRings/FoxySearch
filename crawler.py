@@ -67,8 +67,8 @@ if __name__ == "__main__":
     start_urls_file = 'urls.json'
     output_file = 'output.json'
     proxies = {
-        'http': 'http://orzzxxio-rotate:98jci0yjnkb0@p.webshare.io:80/',
-        'https': 'http://orzzxxio-rotate:98jci0yjnkb0@p.webshare.io:80/'
+        'http': 'yourproxy_the_proxy_in_last_commit_is_not_working_lol',
+        'https': 'yourproxy_the_proxy_in_last_commit_is_not_working_lol'
     }
     scraper = MyScraper(start_urls_file, output_file, proxies)
     scraper.scrape()
