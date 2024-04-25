@@ -11,13 +11,13 @@ class Indexer:
             for item in data:
                 url = item['url']
                 title = item['title']
-                content = ' '.join(item['links'])  # You can index links or any other content
+                content = ' '.join(item['links'])
                 self.index[url] = {'title': title, 'content': content}
 
     def search(self, query):
         results = []
         for url, info in self.index.items():
-            if query.lower() in info['content'].lower():  # Search for the query in the content
+            if query.lower() in info['content'].lower():
                 results.append({'url': url, 'title': info['title']})
         return results
 
@@ -25,10 +25,8 @@ if __name__ == "__main__":
     output_file = 'output.json'
     indexer = Indexer(output_file)
     indexer.load_data()
-
     query = input("Enter your search query: ")
     results = indexer.search(query)
-
     if results:
         print("Search results:")
         for result in results:
